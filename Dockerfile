@@ -1,14 +1,17 @@
-FROM fedora:latest
-MAINTAINER "Laurent Rineau" <laurent.rineau@cgal.org>
+FROM ubuntu:14.04
 
-RUN yum -y update
-RUN yum -y install python-pip && yum clean all
+MAINTAINER Andreas Guth  <andreas.guth@studitemps.de>
 
-ADD LICENSE requirements.txt webhooks.py config.json hooks /src/
-
-RUN cd /src; pip install -r requirements.txt
-
-EXPOSE 5000
-
+ENV DEBIAN_FRONTEND noninteractive
 WORKDIR /src
+
+RUN apt-get update &&\
+    apt-get -y install sed python-pip python-dev uwsgi-plugin-python git
+
+ADD requirements.txt /src/
+RUN pip install -r /src/requirements.txt
+
+COPY ssh /root/.ssh
+ADD webhooks.py config.json hooks /src/
+
 CMD ["python", "/src/webhooks.py"]
